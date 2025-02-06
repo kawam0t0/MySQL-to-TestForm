@@ -21,8 +21,9 @@ export async function POST(request: Request) {
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       ssl: {
-        rejectUnauthorized: false, // 開発環境ではfalseに設定。本番環境では適切なSSL設定を行ってください。
+        rejectUnauthorized: true,
       },
+      connectTimeout: 60000, // タイムアウトを60秒に設定
     })
 
     console.log("Database connection established")

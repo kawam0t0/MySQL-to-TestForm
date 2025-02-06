@@ -1,7 +1,7 @@
 {
     "functions": {
       "app/api/submit-customer/route.ts": {
-        "maxDuration": 30
+        "maxDuration": 60
       }
     }
   }
