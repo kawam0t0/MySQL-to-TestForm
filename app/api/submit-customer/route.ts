@@ -6,16 +6,18 @@ export async function POST(request: Request) {
     const { companyName, name, phoneNumber } = await request.json()
 
     const connection = await mysql.createConnection({
-      host: process.env.DB_HOST, // Cloud SQLのIPアドレスまたはホスト名
+      host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       ssl: {
-        rejectUnauthorized: true, // SSL接続を強制
+        // SSL設定を無効化（開発環境でのテスト用）
+        rejectUnauthorized: false,
       },
     })
 
     try {
+      console.log("Attempting to insert data...")
       await connection.execute("INSERT INTO customers (company_name, name, phone_number) VALUES (?, ?, ?)", [
         companyName,
         name,
@@ -23,9 +25,11 @@ export async function POST(request: Request) {
       ])
       console.log("Data inserted successfully")
 
+      await connection.end()
       return NextResponse.json({ message: "Customer data saved successfully" }, { status: 200 })
     } catch (dbError) {
       console.error("Database error:", dbError)
+      await connection.end()
       return NextResponse.json(
         {
           message: "Database error",
@@ -33,8 +37,6 @@ export async function POST(request: Request) {
         },
         { status: 500 },
       )
-    } finally {
-      await connection.end()
     }
   } catch (error) {
     console.error("API error:", error)
