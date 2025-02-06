@@ -20,11 +20,8 @@ export async function POST(request: Request) {
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      ssl: {
-        rejectUnauthorized: true,
-      },
+      ssl: false, // SSL設定を一時的に無効化
       connectTimeout: 60000,
-      // 以下の設定を追加
       port: 3306,
       waitForConnections: true,
       connectionLimit: 10,
