@@ -11,6 +11,11 @@ export default function CustomerForm() {
     name: "",
     phoneNumber: "",
   })
+  const [status, setStatus] = useState<{
+    type: "success" | "error" | null
+    message: string
+  }>({ type: null, message: "" })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -21,6 +26,9 @@ export default function CustomerForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setStatus({ type: null, message: "" })
+    setIsSubmitting(true)
+
     try {
       const response = await fetch("/api/submit-customer", {
         method: "POST",
@@ -29,15 +37,30 @@ export default function CustomerForm() {
         },
         body: JSON.stringify(formData),
       })
-      if (response.ok) {
-        alert("顧客情報が正常に送信されました。")
+
+      const data = await response.json()
+      console.log("Response:", data)
+
+      if (response.ok && data.success) {
+        setStatus({
+          type: "success",
+          message: "顧客情報が正常に送信されました。",
+        })
         setFormData({ companyName: "", name: "", phoneNumber: "" })
       } else {
-        alert("エラーが発生しました。もう一度お試しください。")
+        setStatus({
+          type: "error",
+          message: `エラー: ${data.error || data.message || "不明なエラーが発生しました"}`,
+        })
       }
     } catch (error) {
-      console.error("Error:", error)
-      alert("エラーが発生しました。もう一度お試しください。")
+      console.error("Submission error:", error)
+      setStatus({
+        type: "error",
+        message: "ネットワークエラーが発生しました。",
+      })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -45,17 +68,42 @@ export default function CustomerForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Label htmlFor="companyName">会社名</Label>
-        <Input id="companyName" name="companyName" value={formData.companyName} onChange={handleChange} required />
+        <Input
+          id="companyName"
+          name="companyName"
+          value={formData.companyName}
+          onChange={handleChange}
+          required
+          disabled={isSubmitting}
+        />
       </div>
       <div>
         <Label htmlFor="name">名前</Label>
-        <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+        <Input id="name" name="name" value={formData.name} onChange={handleChange} required disabled={isSubmitting} />
       </div>
       <div>
         <Label htmlFor="phoneNumber">電話番号</Label>
-        <Input id="phoneNumber" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
+        <Input
+          id="phoneNumber"
+          name="phoneNumber"
+          value={formData.phoneNumber}
+          onChange={handleChange}
+          required
+          disabled={isSubmitting}
+        />
       </div>
-      <Button type="submit">送信</Button>
+      {status.message && (
+        <div
+          className={`p-4 rounded ${
+            status.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+          }`}
+        >
+          {status.message}
+        </div>
+      )}
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "送信中..." : "送信"}
+      </Button>
     </form>
   )
 }
