@@ -23,7 +23,12 @@ export async function POST(request: Request) {
       ssl: {
         rejectUnauthorized: true,
       },
-      connectTimeout: 60000, // タイムアウトを60秒に設定
+      connectTimeout: 60000,
+      // 以下の設定を追加
+      port: 3306,
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
     })
 
     console.log("Database connection established")
