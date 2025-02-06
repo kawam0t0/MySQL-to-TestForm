@@ -1,0 +1,7 @@
+{
+    "functions": {
+      "api/submit-customer": {
+        "maxDuration": 30
+      }
+    }
+  }
